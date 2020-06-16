@@ -86,7 +86,7 @@ vpath %.cpp $(sort $(SRC_S_SUBDIRS))
 vpath %.o $(BUILD_DIR)
 
 _OBJ=$(shell find ./src/ -type f,l -name '*.c' -o -name '*.cpp' -o -name '*.s')
-OBJ:=$(addprefix $(BUILD_DIR)/, $(notdir $(SRC_OBJ:%.c=%.o)))
+OBJ:=$(addprefix $(BUILD_DIR)/, $(notdir $(_OBJ:%.c=%.o)))
 
 LDFLAGS+= -T$(LDSCRIPT) -mthumb -mcpu=cortex-m0 -Wl,--gc-sections
 CFLAGS+= $(INC) -mcpu=cortex-m0 -mthumb -ggdb -D$(MCUTYPE)

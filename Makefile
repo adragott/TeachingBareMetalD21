@@ -1,8 +1,11 @@
-LDSCRIPT = samd21g18a_flash.ld
+LDSCRIPT = ./linker/ex.ld
 BOOTUP = startup_samd21.o system_samd21.o
-MCUTYPE=__SAMD21G18A__
-
-OBJS=$(BOOTUP) main.o
+MCUTYPE=__SAMD21J18A__
+print-%  : ; @echo $* = $($*)
+BUILD_DIR:=build
+SRC_DIR:=src
+INC_DIR:=inc
+BIN_DIR:=bin
 
 # Tools
 CC=arm-none-eabi-gcc
@@ -10,32 +13,44 @@ LD=arm-none-eabi-gcc
 AR=arm-none-eabi-ar
 AS=arm-none-eabi-as
 
-ELF=main.elf
+ELF=./bin/main.elf
 
 LDFLAGS+= -T$(LDSCRIPT) -mthumb -mcpu=cortex-m0 -Wl,--gc-sections
 CFLAGS+= -mcpu=cortex-m0 -mthumb -g
-CFLAGS+= -I xdk-asf -I include -I cmsis -I .
-CFLAGS+= -D$(MCUTYPE)
+# marking include folders
+CFLAGS+=			\
+-I./inc 			\
+-I./inc/asf3-inc	\
+-I./inc/cmsis		\
+-D$(MCUTYPE)
 
-$(ELF): $(OBJS)
+SRC := $(wildcard $(SRC_DIR)/*.c)
+INC = -Iinc/
+
+_OBJ=$(join $(addsuffix $(BUILD_DIR)/, $(dir $(SRC))), $(notdir $(SRC:src/%.c=%.o)))
+OBJ=$(_OBJ:$(SRC_DIR)/%=%)
+
+$(ELF): $(OBJ)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
 # compile and generate dependency info
-%.o: %.c
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) -c $(CFLAGS) $< -o $@
-	$(CC) -MM $(CFLAGS) $< > $*.d
+	$(CC) -MM $(CFLAGS) $< > $(BUILD_DIR)/$*.d
 
-%.o: %.s
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
+	@mkdir -p $(dir $@)
 	$(AS) $< -o $@
 
 clean:
-	rm -f $(OBJS) $(OBJS:.o=.d) $(ELF) startup_stm32f* $(CLEANOTHER)
+	rm -f $(OBJ) $(OBJ:.o=.d) $(ELF) startup_stm32f* $(CLEANOTHER)
 
 debug:  $(ELF)
 	arm-none-eabi-gdb -iex "target extended-remote localhost:3333" $(ELF)
 
 # pull in dependencies
--include $(OBJS:.o=.d)
+-include $(OBJ:$@.o=$@.d)
 
 
 

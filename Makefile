@@ -51,7 +51,7 @@ $(BUILD_DIR)/%.o: %.s
 	$(AS) $< -o $@
 
 clean:
-	rm -f $(OBJ) $(OBJ:.o=.d) $(ELF) $(CLEANOTHER) .gdb_history
+	rm -f $(OBJ) $(OBJ:.o=.d) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(ELF) $(CLEANOTHER) .gdb_history
 
 debug:  $(ELF)
 	arm-none-eabi-gdb -iex "target extended-remote localhost:3333" $(ELF)

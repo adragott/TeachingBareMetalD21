@@ -1,4 +1,6 @@
 #include <inttypes.h>
+#include "usart.h"
+
 
 #define PORT_ADDR (0x41004400)
 
@@ -38,7 +40,7 @@ int main()
 {
     init_pin(LED0_PORT, LED0_PIN);
     init_pin(LED1_PORT, LED1_PIN);
-
+    usart_write();
     for(;;)
     {
         set_pin(LED0_PORT, LED0_PIN);
@@ -72,3 +74,8 @@ void clr_pin(int port, int pin)
     uint32_t* out_reg = (uint32_t*)((PORT_ADDR | (port * PORT_GROUP_SIZE) | PORT_OUT_OFF));
     *out_reg &= ~(1 << pin);
 }
+
+
+
+
+

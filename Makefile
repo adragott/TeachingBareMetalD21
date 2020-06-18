@@ -1,13 +1,14 @@
 LDSCRIPT = ./linker/ex.ld
-BOOTUP = startup_samd21.o system_samd21.o
 MCUTYPE=__SAMD21J18A__
 print-%  : ; @echo $* = $($*)
 BUILD_DIR:=build
 SRC_DIR:=src
 INC_DIR:=inc
 BIN_DIR:=bin
+
 VERBOSE:=0
 _ATSYM_:=@
+
 ifeq ($(VERBOSE),1)
 _ATSYM_=
 clean-build:
@@ -21,7 +22,7 @@ LD=arm-none-eabi-gcc
 AR=arm-none-eabi-ar
 AS=arm-none-eabi-as
 
-ELF=./bin/main.elf
+ELF=$(BIN_DIR)/main.elf
 
 INC = -I./inc		\
 -I./inc/asf3-inc	\
@@ -41,21 +42,20 @@ DEPS:=$(OBJ:.o=.d)
 LDFLAGS+= -T$(LDSCRIPT) -mthumb -mcpu=cortex-m0 -Wl,--gc-sections
 CFLAGS+= $(INC) -mcpu=cortex-m0 -mthumb -ggdb -D$(MCUTYPE)
 
-.PHONY: all clean-build clean 
+.PHONY: all clean-build clean
 
 all: $(ELF)
 $(ELF): $(OBJ)
 	@mkdir -p $(dir $@)
-	@echo "============="
+	@echo "***************"
 	@echo "Linking Target: " $@
-	@echo "prereq: " $(OBJ)
+	@echo "prereq: $(OBJ)"
 	$(_ATSYM_)$(LD) $(LDFLAGS) -o $@ $(OBJ) $(LDLIBS)
-	@echo "$(VERBOSE)"
 
 # compile and generate dependency info
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	@echo "============="
+	@echo "***************"
 	@echo "Compiling $< ---> $@"
 	$(_ATSYM_)$(CC) -c $(CFLAGS) $< -o $@
 	@echo "Outputting Dependency from $< ---> "$(BUILD_DIR)/$*.d
@@ -63,12 +63,15 @@ $(BUILD_DIR)/%.o: %.c
 
 $(BUILD_DIR)/%.o: %.s
 	@mkdir -p $(dir $@)
-	@echo "============="
+	@echo "***************"
 	@echo "Assembling $< ---> $@"
 	$(_ATSYM_)$(AS) $< -o $@
 
 clean:
-	rm -f $(OBJ) $(OBJ:.o=.d) $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o $(ELF) $(CLEANOTHER) .gdb_history
+	@echo "Cleaning project..."
+	$(_ATSYM_)rm -f $(OBJ) $(DEPS)
+	$(_ATSYM_)rm -f $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
+	$(_ATSYM_)rm -f $(ELF) .gdb_history
 
 clean-build: clean all
 
@@ -76,6 +79,6 @@ debug:  $(ELF)
 	arm-none-eabi-gdb -iex "target extended-remote localhost:3333" $(ELF)
 
 # pull in dependencies
--include $(OBJ:$@.o=$@.d)
+-include $(DEPS)
 
 

@@ -39,7 +39,7 @@ _OBJ=$(shell find ./src/ -type f,l -name '*.c' -o -name '*.cpp' -o -name '*.s')
 OBJ:=$(addprefix $(BUILD_DIR)/, $(notdir $(_OBJ:%.c=%.o)))
 DEPS:=$(OBJ:.o=.d)
 
-LDFLAGS+= -T$(LDSCRIPT) -mthumb -mcpu=cortex-m0 -Wl,--gc-sections
+LDFLAGS+= -T$(LDSCRIPT) -Wall -mthumb -mcpu=cortex-m0 -Wl,--gc-sections
 CFLAGS+= $(INC) -mcpu=cortex-m0 -mthumb -ggdb -D$(MCUTYPE)
 
 .PHONY: all clean-build clean

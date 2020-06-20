@@ -1,3 +1,4 @@
+#include <samd21.h>
 #include <inttypes.h>
 #include "usart.h"
 
@@ -10,16 +11,16 @@
 #define PORT_B_OFF (0x80)
 
 #define PORT_DIR_OFF (0x00)
-#define PORT_OUT_OFF (0x10)
+#define PORT_OUT_OFF 		(0x10)
 
 // LED 0: PA09
 // LED 1: PB01
 
-#define LED0_PORT   (0)
-#define LED0_PIN    (9)
+#define LED0_PORT		  	(0)
+#define LED0_PIN			(9)
 
-#define LED1_PORT   (1)
-#define LED1_PIN    (1)
+#define LED1_PORT               (1)
+#define LED1_PIN    			(1)
 
 static void init_pin(int port, int pin);
 static void set_pin(int port, int pin);
@@ -28,19 +29,25 @@ static void clr_pin(int port, int pin);
 static void delay(int n)
 {
     int i;
+    
     for(;n>0;n--)
     {
         for(i=0;i<100;i++)
         {
+
             asm volatile("nop");
         }
     }
 }
+
+
+
 int main()
 {
     init_pin(LED0_PORT, LED0_PIN);
     init_pin(LED1_PORT, LED1_PIN);
     usart_write();
+    
     for(;;)
     {
         set_pin(LED0_PORT, LED0_PIN);
